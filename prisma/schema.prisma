@@ -1,0 +1,57 @@
+// Prisma schema
+// SQLite по умолчанию. Чтобы перейти на PostgreSQL:
+//   1. provider = "sqlite" -> provider = "postgresql"
+//   2. DATABASE_URL в .env -> "postgresql://user:pass@localhost:5432/akb"
+//   3. npm run db:push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Товары (аккумуляторы)
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  brand       String
+  capacity    Int      // ёмкость, Ач
+  current     Int      // пусковой ток, А
+  price       Int      // цена, сом
+  polarity    String   @default("прямая") // прямая / обратная
+  description String?
+  image       String?  // путь к изображению
+  createdAt   DateTime @default(now())
+
+  @@map("products")
+}
+
+// Заявки с сайта
+model Order {
+  id            Int      @id @default(autoincrement())
+  customerName  String
+  phone         String
+  car           String?  // марка автомобиля / выбранный товар
+  comment       String?
+  status        String   @default("Новая") // Новая / В работе / Выполнена
+  productName   String?  // что заказывают (аккумулятор)
+  total         Int      @default(0)       // сумма к оплате, сом
+  paymentStatus String   @default("none")  // none / pending / paid / failed
+  paymentId     String?  // id транзакции у платёжного провайдера
+  payUrl        String?  // ссылка на оплату (от провайдера)
+  createdAt     DateTime @default(now())
+
+  @@map("orders")
+}
+
+// Администраторы
+model Admin {
+  id           Int    @id @default(autoincrement())
+  login        String @unique
+  passwordHash String
+
+  @@map("admins")
+}
